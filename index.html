@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cat Fish Game</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+        
+        #game-container { width: 100%; height: 100%; position: relative; background: linear-gradient(180deg, #1a5276 0%, #2471a3 30%, #2980b9 60%, #1a5276 100%); cursor: crosshair; }
+        
+        .water-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 5; background: radial-gradient(ellipse 100% 50% at 50% 0%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(ellipse 80% 40% at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 40%), radial-gradient(ellipse 60% 30% at 70% 30%, rgba(255,255,255,0.08) 0%, transparent 35%); }
+        
+        .water-caustics { position: absolute; inset: 0; pointer-events: none; z-index: 6; opacity: 0.3; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px); animation: caustics 20s linear infinite; }
+        
+        @keyframes caustics { 0% { transform: translateX(0) translateY(0); } 50% { transform: translateX(20px) translateY(10px); } 100% { transform: translateX(0) translateY(0); } }
+        
+        .light-rays { position: absolute; inset: 0; pointer-events: none; z-index: 15; overflow: hidden; }
+        .light-ray { position: absolute; width: 8%; height: 140%; top: -20%; background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.01) 30%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.01) 70%, transparent 100%); transform-origin: top center; animation: lightRayGlimmer 10s ease-in-out infinite; }
+        @keyframes lightRayGlimmer { 0%, 100% { opacity: 0.2; transform: rotate(-15deg); } 50% { opacity: 0.5; transform: rotate(-10deg); } }
+        
+        .shimmer-spot { position: absolute; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,0.04) 0%, transparent 70%); animation: shimmerPulse 8s ease-in-out infinite; }
+        @keyframes shimmerPulse { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.05); } }
+        
+        .lily-pad { position: absolute; pointer-events: none; z-index: 100; }
+        .fish { position: absolute; pointer-events: none; transition: opacity 0.05s linear; }
+        .ripple { position: absolute; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; pointer-events: none; z-index: 90; }
+        .pop-particle { position: absolute; border-radius: 50%; pointer-events: none; }
+        
+        .floating-points { position: absolute; pointer-events: none; font-weight: bold; color: #fde047; font-size: 32px; text-shadow: 0 0 10px gold, 0 2px 4px rgba(0,0,0,0.5); z-index: 200; }
+        
+        .control-bar { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); border-radius: 50px; padding: 8px 16px; z-index: 200; }
+        .control-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: white; }
+        .control-btn:active { transform: scale(0.95); }
+        .btn-home { background: rgba(239,68,68,0.8); }
+        .btn-home:hover { background: rgba(220,38,38,0.9); }
+        .btn-settings { background: rgba(107,114,128,0.8); }
+        .btn-settings:hover { background: rgba(75,85,99,0.9); }
+        .btn-fullscreen { background: rgba(59,130,246,0.8); }
+        .btn-fullscreen:hover { background: rgba(37,99,235,0.9); }
+        
+        .score-display { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); border-radius: 50px; padding: 12px 24px; z-index: 150; pointer-events: none; }
+        .score-item { display: flex; align-items: center; gap: 8px; color: white; font-size: 24px; font-weight: bold; }
+        .timer-warning { color: #f87171; animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        .sound-btn { position: absolute; top: 70px; right: 16px; width: 48px; height: 48px; border-radius: 50%; background: rgba(0,0,0,0.3); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; z-index: 150; }
+        
+        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .menu-card { background: rgba(255,255,255,0.95); border-radius: 24px; padding: 32px; max-width: 400px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); z-index: 1001; }
+        .menu-title { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
+        .menu-title h1 { font-size: 30px; font-weight: bold; color: #1f2937; }
+        .menu-subtitle { text-align: center; color: #6b7280; margin-bottom: 24px; }
+        
+        .high-scores { background: linear-gradient(to right, #fef9c3, #ffedd5); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .high-scores-title { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+        .high-score-item { display: flex; justify-content: space-between; font-size: 14px; color: #6b7280; padding: 2px 0; }
+        
+        .settings-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f3f4f6; border-radius: 12px; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: #374151; margin-bottom: 16px; }
+        .settings-toggle:hover { background: #e5e7eb; }
+        .settings-content { padding: 16px; background: #f9fafb; border-radius: 0 0 12px 12px; border-top: 1px solid #e5e7eb; margin-top: -12px; margin-bottom: 16px; }
+        
+        .setting-row { margin-bottom: 16px; }
+        .setting-label { display: block; font-size: 14px; color: #374151; margin-bottom: 8px; }
+        .setting-slider { width: 100%; height: 8px; border-radius: 4px; background: #e5e7eb; -webkit-appearance: none; appearance: none; cursor: pointer; }
+        .setting-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; cursor: pointer; }
+        .setting-toggle-row { display: flex; align-items: center; justify-content: space-between; }
+        .toggle-switch { width: 48px; height: 28px; background: #d1d5db; border-radius: 14px; position: relative; cursor: pointer; transition: background 0.2s; }
+        .toggle-switch.active { background: #3b82f6; }
+        .toggle-switch::after { content: ''; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: left 0.2s; }
+        .toggle-switch.active::after { left: 23px; }
+        
+        .quality-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
+        .quality-btn { padding: 8px; border-radius: 8px; border: none; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .quality-btn.active { background: #3b82f6; color: white; }
+        .quality-btn:not(.active) { background: #e5e7eb; color: #6b7280; }
+        .quality-btn:not(.active):hover { background: #d1d5db; }
+        
+        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(to right, #3b82f6, #06b6d4); color: white; padding: 24px; }
+        .btn-primary:hover { background: linear-gradient(to right, #2563eb, #0891b2); }
+        .btn-outline { background: white; border: 1px solid #e5e7eb; color: #374151; margin-top: 12px; }
+        .btn-outline:hover { background: #f9fafb; }
+        .btn-danger { background: #ef4444; color: white; margin-top: 12px; }
+        .btn-danger:hover { background: #dc2626; }
+        
+        .instructions { text-align: center; color: #9ca3af; font-size: 14px; margin-top: 24px; }
+        .instructions p { margin: 4px 0; }
+        .golden-text { color: #ca8a04; font-weight: 500; }
+        
+        .settings-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1100; }
+        .settings-card { background: white; border-radius: 16px; padding: 24px; max-width: 350px; width: 90%; z-index: 1101; }
+        .settings-title { font-size: 20px; font-weight: 600; color: #1f2937; margin-bottom: 24px; }
+        
+        .fullscreen-exit { position: fixed; bottom: 16px; right: 16px; width: 56px; height: 56px; border-radius: 50%; background: rgba(0,0,0,0.6); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; z-index: 500; }
+        
+        .new-high-score { background: linear-gradient(to right, #fef9c3, #ffedd5); color: #ea580c; padding: 8px 16px; border-radius: 50px; display: inline-block; margin-bottom: 24px; }
+        .final-score { font-size: 48px; font-weight: bold; color: #3b82f6; margin: 16px 0; }
+        
+        .hidden { display: none !important; }
+        .icon { width: 24px; height: 24px; }
+        .icon-small { width: 20px; height: 20px; }
+        .icon-large { width: 32px; height: 32px; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="light-rays" id="light-rays"></div>
+        <div class="water-overlay"></div>
+        <div class="water-caustics"></div>
+        <div id="lily-pads"></div>
+        <div id="fish-container"></div>
+        <div id="effects-container"></div>
+        <div id="floating-points-container"></div>
+        
+        <div id="control-bar" class="control-bar">
+            <button class="control-btn btn-home" onclick="stopGame()" title="Menu">
+                <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+            </button>
+            <button class="control-btn btn-settings" onclick="openSettings()" title="Settings">
+                <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+            <button id="fullscreen-btn" class="control-btn btn-fullscreen" onclick="toggleFullscreen()" title="Fullscreen">
+                <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,3 21,3 21,9"/><polyline points="9,21 3,21 3,15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            </button>
+        </div>
+        
+        <div id="score-display" class="score-display hidden">
+            <div class="score-item">
+                <svg class="icon" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                <span id="score-value">0</span>
+            </div>
+            <div id="timer-display" class="score-item">
+                <span id="timer-value">1:00</span>
+            </div>
+        </div>
+        
+        <button id="sound-btn" class="sound-btn hidden" onclick="toggleSound()">
+            <svg id="sound-on-icon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <svg id="sound-off-icon" class="icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        </button>
+        
+        <button id="fullscreen-exit" class="fullscreen-exit hidden" onclick="exitFullscreen()">
+            <svg class="icon-large" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,14 10,14 10,20"/><polyline points="20,10 14,10 14,4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        </button>
+        
+        <!-- Menu Screen -->
+        <div id="menu-screen" class="menu-overlay">
+            <div class="menu-card">
+                <div class="menu-title">
+                    <svg class="icon" viewBox="0 0 24 24" fill="#3b82f6"><ellipse cx="12" cy="12" rx="10" ry="6"/><polygon points="20,12 24,8 24,16"/></svg>
+                    <h1>Cat Fish</h1>
+                    <svg class="icon" viewBox="0 0 24 24" fill="#f97316"><ellipse cx="12" cy="12" rx="10" ry="6"/><polygon points="20,12 24,8 24,16"/></svg>
+                </div>
+                <p class="menu-subtitle">A fun tapping game for your cat!</p>
+                
+                <div id="high-scores" class="high-scores hidden">
+                    <div class="high-scores-title">
+                        <svg class="icon-small" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                        High Scores
+                    </div>
+                    <div id="high-scores-list"></div>
+                </div>
+                
+                <button class="settings-toggle" onclick="toggleMenuSettings()">
+                    <span>Settings</span>
+                    <svg id="settings-chevron" class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                </button>
+                <div id="menu-settings-content" class="settings-content hidden">
+                    <div class="setting-row setting-toggle-row">
+                        <span class="setting-label" style="margin: 0;">Forever Mode</span>
+                        <div id="forever-toggle" class="toggle-switch" onclick="toggleForeverMode()"></div>
+                    </div>
+                    
+                    <div id="duration-setting" class="setting-row">
+                        <label class="setting-label" id="duration-label">Duration: 1:00</label>
+                        <input type="range" class="setting-slider" id="duration-slider" min="30" max="300" step="15" value="60" oninput="updateDuration()">
+                    </div>
+                    
+                    <div class="setting-row">
+                        <label class="setting-label" id="fish-count-label">Fish: 8</label>
+                        <input type="range" class="setting-slider" id="fish-count-slider" min="3" max="20" step="1" value="8" oninput="updateFishCount()">
+                    </div>
+                    
+                    <div class="setting-row">
+                        <label class="setting-label" id="fish-speed-label">Speed: 1.0x</label>
+                        <input type="range" class="setting-slider" id="fish-speed-slider" min="3" max="30" step="1" value="10" oninput="updateFishSpeed()">
+                    </div>
+                    
+                    <div class="setting-row setting-toggle-row">
+                        <span class="setting-label" style="margin: 0;">Sound</span>
+                        <div id="sound-toggle" class="toggle-switch active" onclick="toggleSoundSetting()"></div>
+                    </div>
+                    
+                    <div class="setting-row">
+                        <label class="setting-label">Quality</label>
+                        <div class="quality-buttons">
+                            <button id="quality-low" class="quality-btn" onclick="setQuality('low')">Low</button>
+                            <button id="quality-medium" class="quality-btn" onclick="setQuality('medium')">Med</button>
+                            <button id="quality-high" class="quality-btn active" onclick="setQuality('high')">High</button>
+                            <button id="quality-ultra" class="quality-btn" onclick="setQuality('ultra')">Ultra</button>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+                </div>
+                
+                <button class="btn btn-primary" onclick="startGame()">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+                    Start Game
+                </button>
+                
+                <button id="fullscreen-toggle-btn" class="btn btn-outline" onclick="toggleFullscreen()">
+                    <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,3 21,3 21,9"/><polyline points="9,21 3,21 3,15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                    <span id="fullscreen-text">Go Fullscreen</span>
+                </button>
+                
+                <div class="instructions">
+                    <p>Tap fish = +1 point</p>
+                    <p>Tap twice within 2s = pop +3 points!</p>
+                    <p>★ Boss fish = 4 hits in 5s = +10 points!</p>
+                    <p class="golden-text">✦ Golden fish = 3 hits in 3s = +15 points!</p>
+                    <p style="font-size: 12px; opacity: 0.7;">Fish under lily pads can't be tapped</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="settings-modal hidden">
+            <div class="settings-card">
+                <h2 class="settings-title">Game Settings</h2>
+                
+                <div class="setting-row setting-toggle-row">
+                    <span class="setting-label" style="margin: 0;">Forever Mode</span>
+                    <div id="forever-toggle-modal" class="toggle-switch" onclick="toggleForeverMode()"></div>
+                </div>
+                
+                <div id="duration-setting-modal" class="setting-row">
+                    <label class="setting-label" id="duration-label-modal">Duration: 1:00</label>
+                    <input type="range" class="setting-slider" id="duration-slider-modal" min="30" max="300" step="15" value="60" oninput="updateDurationModal()">
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label" id="fish-count-label-modal">Fish: 8</label>
+                    <input type="range" class="setting-slider" id="fish-count-slider-modal" min="3" max="20" step="1" value="8" oninput="updateFishCountModal()">
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label" id="fish-speed-label-modal">Speed: 1.0x</label>
+                    <input type="range" class="setting-slider" id="fish-speed-slider-modal" min="3" max="30" step="1" value="10" oninput="updateFishSpeedModal()">
+                </div>
+                
+                <div class="setting-row setting-toggle-row">
+                    <span class="setting-label" style="margin: 0;">Sound</span>
+                    <div id="sound-toggle-modal" class="toggle-switch active" onclick="toggleSoundSetting()"></div>
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">Quality</label>
+                    <div class="quality-buttons">
+                        <button id="quality-low-modal" class="quality-btn" onclick="setQuality('low')">Low</button>
+                        <button id="quality-medium-modal" class="quality-btn" onclick="setQuality('medium')">Med</button>
+                        <button id="quality-high-modal" class="quality-btn active" onclick="setQuality('high')">High</button>
+                        <button id="quality-ultra-modal" class="quality-btn" onclick="setQuality('ultra')">Ultra</button>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="closeSettings()" style="margin-top: 8px;">Resume Game</button>
+            </div>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="menu-overlay hidden">
+            <div class="menu-card" style="text-align: center;">
+                <svg class="icon-large" viewBox="0 0 24 24" fill="#eab308" style="margin: 0 auto;"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                <h2 style="font-size: 30px; font-weight: bold; color: #1f2937; margin: 16px 0 8px;">Game Over!</h2>
+                <div id="final-score" class="final-score">0</div>
+                <p style="color: #6b7280; margin-bottom: 16px;">points</p>
+                
+                <div id="new-high-score" class="new-high-score hidden">New High Score!</div>
+                
+                <button class="btn btn-primary" onclick="startGame()">
+                    <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    Play Again
+                </button>
+                <button class="btn btn-outline" onclick="showMenu()">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = 'menu';
+        let score = 0;
+        let timeLeft = 60;
+        let gameTimer = null;
+        let animationFrame = null;
+        let isFullscreen = false;
+        let isPaused = false;
+        let menuSettingsCollapsed = true;
+        
+        // Settings
+        let settings = {
+            duration: 60,
+            fishCount: 8,
+            fishSpeed: 1.0,
+            soundEnabled: true,
+            foreverMode: false,
+            quality: 'high'
+        };
+        
+        // Quality Config
+        const QUALITY_CONFIG = {
+            low: { lightRays: 0, shimmerSpots: 0, popParticles: 4, fishScales: false },
+            medium: { lightRays: 2, shimmerSpots: 3, popParticles: 6, fishScales: true },
+            high: { lightRays: 4, shimmerSpots: 6, popParticles: 8, fishScales: true },
+            ultra: { lightRays: 5, shimmerSpots: 8, popParticles: 8, fishScales: true }
+        };
+        
+        // Fish types
+        const FISH_TYPES = [
+            { name: 'goldfish', color: '#FFD700', baseSize: 50 },
+            { name: 'koi', color: '#FF6B35', baseSize: 55 },
+            { name: 'blue', color: '#4A90D9', baseSize: 48 },
+            { name: 'purple', color: '#9B59B6', baseSize: 52 },
+            { name: 'green', color: '#2ECC71', baseSize: 45 },
+            { name: 'pink', color: '#E91E63', baseSize: 50 },
+            { name: 'red', color: '#E74C3C', baseSize: 53 },
+            { name: 'teal', color: '#1ABC9C', baseSize: 47 }
+        ];
+        
+        const SIZE_MULT_MIN = 3, SIZE_MULT_MAX = 4, HIT_BOX_MULT = 1.4;
+        const DOUBLE_TAP_WINDOW = 2000;
+        
+        // Game entities
+        let fish = [];
+        let ripples = [];
+        let popEffects = [];
+        let floatingPoints = [];
+        let lilyPads = [];
+        let fishIdCounter = 0;
+        let lastTapTimes = new Map();
+        
+        // Audio
+        let audioContext = null;
+        
+        function getAudioContext() {
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            return audioContext;
+        }
+        
+        function playPopSound() {
+            if (!settings.soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.15);
+            } catch(e) {}
+        }
+        
+        function playSplashSound() {
+            if (!settings.soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.1);
+            } catch(e) {}
+        }
+        
+        function playScoreSound() {
+            if (!settings.soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.setValueAtTime(523, ctx.currentTime);
+                osc.frequency.setValueAtTime(659, ctx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.1);
+            } catch(e) {}
+        }
+        
+        // Create light rays
+        function createLightRays() {
+            const container = document.getElementById('light-rays');
+            container.innerHTML = '';
+            const config = QUALITY_CONFIG[settings.quality];
+            
+            for (let i = 0; i < config.lightRays; i++) {
+                const ray = document.createElement('div');
+                ray.className = 'light-ray';
+                ray.style.left = (10 + i * (80 / config.lightRays)) + '%';
+                ray.style.animationDelay = (i * 0.7) + 's';
+                ray.style.animationDuration = (10 + i * 3) + 's';
+                ray.style.transform = 'rotate(' + (-15 + i * 8) + 'deg)';
+                container.appendChild(ray);
+            }
+            
+            for (let i = 0; i < config.shimmerSpots; i++) {
+                const spot = document.createElement('div');
+                spot.className = 'shimmer-spot';
+                spot.style.top = (10 + (i % 4) * 25) + '%';
+                spot.style.left = (5 + i * (85 / config.shimmerSpots)) + '%';
+                spot.style.width = (50 + i * 10) + 'px';
+                spot.style.height = (40 + i * 8) + 'px';
+                spot.style.animationDelay = (i * 0.4) + 's';
+                container.appendChild(spot);
+            }
+        }
+        
+        // Create fish
+        function createFish(isBoss = false, isFast = false, isGolden = false) {
+            const id = ++fishIdCounter;
+            const type = isGolden ? { name: 'golden', color: '#FFD700', baseSize: 30 } : FISH_TYPES[Math.floor(Math.random() * FISH_TYPES.length)];
+            
+            let sizeMultiplier;
+            if (isGolden) sizeMultiplier = 1.5 + Math.random() * 0.5;
+            else if (isBoss) sizeMultiplier = SIZE_MULT_MIN * 2 + Math.random() * (SIZE_MULT_MAX - SIZE_MULT_MIN) * 2;
+            else sizeMultiplier = SIZE_MULT_MIN + Math.random() * (SIZE_MULT_MAX - SIZE_MULT_MIN);
+            
+            const actualSize = type.baseSize * sizeMultiplier;
+            const hitRadius = actualSize * HIT_BOX_MULT * 0.5;
+            
+            const container = document.getElementById('game-container');
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            
+            const edge = Math.floor(Math.random() * 4);
+            let x, y, angle;
+            
+            switch(edge) {
+                case 0: x = Math.random() * width; y = -actualSize - Math.random() * 50; angle = Math.PI / 2 + (Math.random() - 0.5) * 1.2; break;
+                case 1: x = width + actualSize + Math.random() * 50; y = Math.random() * height; angle = Math.PI + (Math.random() - 0.5) * 1.2; break;
+                case 2: x = Math.random() * width; y = height + actualSize + Math.random() * 50; angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.2; break;
+                default: x = -actualSize - Math.random() * 50; y = Math.random() * height; angle = (Math.random() - 0.5) * 1.2; break;
+            }
+            
+            let baseSpeed;
+            if (isGolden) baseSpeed = 1.2 + Math.random() * 0.6;
+            else if (isFast) baseSpeed = 0.9 + Math.random() * 0.6;
+            else baseSpeed = 0.3 + Math.random() * 0.3;
+            
+            return {
+                id, x, y, angle, speed: baseSpeed, baseSpeed, type, sizeMultiplier, actualSize, hitRadius,
+                tailPhase: Math.random() * Math.PI * 2, finPhase: Math.random() * Math.PI * 2,
+                tapped: 0, speedBoost: 0, entering: true, opacity: isBoss ? 0.5 : 1,
+                popping: false, popOpacity: 1, isBoss, isFast, isGolden,
+                targetAngle: angle, turnTimer: Math.random() * 100, tapWindowStart: 0, eyeScale: 1
+            };
+        }
+        
+        // Create lily pads
+        function createLilyPads() {
+            const container = document.getElementById('game-container');
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            lilyPads = [];
+            
+            const numPads = 4 + Math.floor(Math.random() * 3);
+            const minDistance = 150;
+            
+            for (let i = 0; i < numPads; i++) {
+                let attempts = 0, x, y, valid = false;
+                
+                while (!valid && attempts < 50) {
+                    x = 100 + Math.random() * (width - 200);
+                    y = 100 + Math.random() * (height - 200);
+                    valid = true;
+                    
+                    for (const pad of lilyPads) {
+                        const dx = x - pad.x, dy = y - pad.y;
+                        if (Math.sqrt(dx * dx + dy * dy) < minDistance) { valid = false; break; }
+                    }
+                    attempts++;
+                }
+                
+                lilyPads.push({
+                    id: i + 1, x, y,
+                    width: 120 + Math.random() * 80,
+                    height: 90 + Math.random() * 60
+                });
+            }
+        }
+        
+        // Render lily pads
+        function renderLilyPads() {
+            const container = document.getElementById('lily-pads');
+            container.innerHTML = '';
+            
+            for (const pad of lilyPads) {
+                const div = document.createElement('div');
+                div.className = 'lily-pad';
+                div.style.left = (pad.x - pad.width / 2) + 'px';
+                div.style.top = (pad.y - pad.height / 2) + 'px';
+                div.style.width = pad.width + 'px';
+                div.style.height = pad.height + 'px';
+                div.innerHTML = `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <ellipse cx="50" cy="50" rx="45" ry="35" fill="#2d5a27"/>
+                    <path d="M50 15 Q50 50 50 85" stroke="#1a3d18" stroke-width="3" fill="none"/>
+                    <ellipse cx="35" cy="45" rx="8" ry="6" fill="#3d7a37" opacity="0.5"/>
+                    <ellipse cx="60" cy="55" rx="10" ry="7" fill="#3d7a37" opacity="0.4"/>
+                </svg>`;
+                container.appendChild(div);
+            }
+        }
+        
+        // Check if point is under lily pad
+        function isUnderLilyPad(x, y) {
+            for (const pad of lilyPads) {
+                const dx = x - pad.x, dy = y - pad.y;
+                const rx = pad.width / 2, ry = pad.height / 2;
+                if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1) return true;
+            }
+            return false;
+        }
+        
+        // Render fish
+        function renderFish() {
+            const container = document.getElementById('fish-container');
+            container.innerHTML = '';
+            
+            for (const f of fish) {
+                if (f.popping && f.popOpacity <= 0) continue;
+                
+                const tailWag = Math.sin(f.tailPhase) * 15;
+                const finMove = Math.sin(f.finPhase) * 10;
+                const rotationDegrees = (f.angle * 180 / Math.PI) + 180;
+                const displayOpacity = f.popping ? f.popOpacity : f.opacity;
+                const zIndex = f.isGolden ? 4 : (f.isBoss ? 1 : (f.isFast ? 3 : 2));
+                const eyeR = 6 * (f.eyeScale || 1);
+                const pupilR = 3 * (f.eyeScale || 1);
+                
+                const config = QUALITY_CONFIG[settings.quality];
+                
+                let fishSVG = `<svg width="${f.actualSize}" height="${f.actualSize * 0.6}" viewBox="0 0 100 60" style="overflow: visible;">
+                    <ellipse cx="45" cy="30" rx="35" ry="20" fill="${f.type.color}"/>
+                    <polygon points="80,30 95,15 95,45" fill="${f.type.color}" transform="rotate(${tailWag}, 80, 30)"/>
+                    <polygon points="35,10 50,0 55,10" fill="${f.type.color}" transform="rotate(${finMove * 0.5}, 45, 10)"/>
+                    <polygon points="35,50 50,60 55,50" fill="${f.type.color}" transform="rotate(${-finMove * 0.5}, 45, 50)"/>
+                    <circle cx="25" cy="25" r="${eyeR}" fill="white"/>
+                    <circle cx="23" cy="25" r="${pupilR}" fill="black"/>
+                    <ellipse cx="40" cy="22" rx="15" ry="8" fill="white" opacity="0.3"/>`;
+                
+                if (config.fishScales) {
+                    fishSVG += `<g opacity="0.2">
+                        <circle cx="35" cy="30" r="5" fill="white"/>
+                        <circle cx="45" cy="35" r="5" fill="white"/>
+                        <circle cx="55" cy="28" r="5" fill="white"/>
+                        <circle cx="50" cy="40" r="4" fill="white"/>
+                    </g>`;
+                }
+                
+                if (f.isFast) {
+                    fishSVG += `<g>
+                        <line x1="95" y1="30" x2="110" y2="30" stroke="white" stroke-width="2" opacity="0.6"/>
+                        <line x1="95" y1="25" x2="105" y2="25" stroke="white" stroke-width="1.5" opacity="0.4"/>
+                        <line x1="95" y1="35" x2="105" y2="35" stroke="white" stroke-width="1.5" opacity="0.4"/>
+                    </g>`;
+                }
+                
+                if (f.isBoss) {
+                    fishSVG += `<g>
+                        <circle cx="45" cy="10" r="8" fill="gold" opacity="0.6"/>
+                        <text x="45" y="14" text-anchor="middle" font-size="10" fill="white" font-weight="bold">★</text>
+                    </g>`;
+                }
+                
+                if (f.isGolden) {
+                    fishSVG += `<g>
+                        <circle cx="50" cy="30" r="25" fill="url(#goldenGlow${f.id})" opacity="0.3"/>
+                        <text x="45" y="8" text-anchor="middle" font-size="8" fill="gold" font-weight="bold">✦</text>
+                        <text x="65" y="20" text-anchor="middle" font-size="6" fill="gold" opacity="0.8">✦</text>
+                        <text x="30" y="45" text-anchor="middle" font-size="7" fill="gold" opacity="0.7">✦</text>
+                        <defs>
+                            <radialGradient id="goldenGlow${f.id}">
+                                <stop offset="0%" stop-color="gold" stop-opacity="0.5"/>
+                                <stop offset="100%" stop-color="gold" stop-opacity="0"/>
+                            </radialGradient>
+                        </defs>
+                    </g>`;
+                }
+                
+                fishSVG += '</svg>';
+                
+                const div = document.createElement('div');
+                div.className = 'fish';
+                div.style.left = f.x + 'px';
+                div.style.top = f.y + 'px';
+                div.style.transform = `translate(-50%, -50%) rotate(${rotationDegrees}deg)`;
+                div.style.opacity = displayOpacity;
+                div.style.zIndex = zIndex;
+                div.innerHTML = fishSVG;
+                container.appendChild(div);
+            }
+        }
+        
+        // Render effects
+        function renderEffects() {
+            const container = document.getElementById('effects-container');
+            container.innerHTML = '';
+            
+            for (const r of ripples) {
+                const div = document.createElement('div');
+                div.className = 'ripple';
+                div.style.left = (r.x - r.size / 2) + 'px';
+                div.style.top = (r.y - r.size / 2) + 'px';
+                div.style.width = r.size + 'px';
+                div.style.height = r.size + 'px';
+                div.style.opacity = r.opacity;
+                container.appendChild(div);
+            }
+            
+            const config = QUALITY_CONFIG[settings.quality];
+            
+            for (const p of popEffects) {
+                for (let j = 0; j < config.popParticles; j++) {
+                    const div = document.createElement('div');
+                    div.className = 'pop-particle';
+                    div.style.left = p.x + 'px';
+                    div.style.top = p.y + 'px';
+                    div.style.width = '15px';
+                    div.style.height = '15px';
+                    div.style.backgroundColor = p.color;
+                    div.style.transform = `rotate(${j * (360 / config.popParticles)}deg) translateX(${p.size * 0.6}px)`;
+                    div.style.opacity = p.opacity;
+                    container.appendChild(div);
+                }
+            }
+        }
+        
+        // Render floating points
+        function renderFloatingPoints() {
+            const container = document.getElementById('floating-points-container');
+            container.innerHTML = '';
+            
+            for (const fp of floatingPoints) {
+                const div = document.createElement('div');
+                div.className = 'floating-points';
+                div.style.left = fp.x + 'px';
+                div.style.top = (fp.y + fp.yOffset) + 'px';
+                div.style.transform = 'translate(-50%, -50%)';
+                div.style.opacity = fp.opacity;
+                div.textContent = '+' + fp.points;
+                container.appendChild(div);
+            }
+        }
+        
+        // Update fish
+        function updateFish() {
+            const container = document.getElementById('game-container');
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            const speedMultiplier = settings.fishSpeed;
+            
+            fish = fish.filter(f => {
+                if (f.popping) {
+                    f.popOpacity -= 1/60;
+                    return f.popOpacity > 0;
+                }
+                
+                f.tailPhase += 0.15;
+                f.finPhase += 0.1;
+                
+                if (f.speedBoost > 0) {
+                    f.speedBoost -= 0.02;
+                    f.speed = f.baseSpeed * 3;
+                } else {
+                    f.speed = f.baseSpeed;
+                }
+                
+                // Eye animation based on tap window
+                if (f.tapped > 0 && f.tapWindowStart > 0) {
+                    const elapsed = Date.now() - f.tapWindowStart;
+                    const tapWindow = f.isGolden ? 3000 : (f.isBoss ? 5000 : 2000);
+                    const progress = Math.min(1, elapsed / tapWindow);
+                    f.eyeScale = 1.5 - (progress * 0.5);
+                    
+                    if (elapsed > tapWindow) {
+                        const requiredTaps = f.isGolden ? 3 : (f.isBoss ? 4 : 2);
+                        if (f.tapped < requiredTaps) {
+                            f.tapped = 0;
+                            f.tapWindowStart = 0;
+                            f.eyeScale = 1;
+                        }
+                    }
+                }
+                
+                const actualSpeed = f.speed * speedMultiplier;
+                
+                f.turnTimer--;
+                if (f.turnTimer <= 0) {
+                    f.targetAngle = Math.random() * Math.PI * 2;
+                    f.turnTimer = 50 + Math.random() * 150;
+                }
+                
+                let angleDiff = f.targetAngle - f.angle;
+                while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                f.angle += angleDiff * 0.02;
+                
+                f.x += Math.cos(f.angle) * actualSpeed * 2;
+                f.y += Math.sin(f.angle) * actualSpeed * 2;
+                
+                if (f.entering) {
+                    f.opacity = Math.min(f.isBoss ? 0.5 : 1, f.opacity + 0.02);
+                    if (f.opacity >= (f.isBoss ? 0.5 : 1)) f.entering = false;
+                }
+                
+                if (f.x < -f.actualSize * 2) f.x = width + f.actualSize;
+                if (f.x > width + f.actualSize * 2) f.x = -f.actualSize;
+                if (f.y < -f.actualSize * 2) f.y = height + f.actualSize;
+                if (f.y > height + f.actualSize * 2) f.y = -f.actualSize;
+                
+                const edgeMargin = 80;
+                if (f.x < edgeMargin) { f.targetAngle = (Math.random() - 0.5) * 0.5; f.turnTimer = 30; }
+                if (f.x > width - edgeMargin) { f.targetAngle = Math.PI + (Math.random() - 0.5) * 0.5; f.turnTimer = 30; }
+                if (f.y < edgeMargin) { f.targetAngle = Math.PI / 2 + (Math.random() - 0.5) * 0.5; f.turnTimer = 30; }
+                if (f.y > height - edgeMargin) { f.targetAngle = -Math.PI / 2 + (Math.random() - 0.5) * 0.5; f.turnTimer = 30; }
+                
+                return true;
+            });
+            
+            ripples = ripples.map(r => ({ ...r, size: r.size + 3, opacity: r.opacity - 0.02 })).filter(r => r.opacity > 0);
+            popEffects = popEffects.map(p => ({ ...p, opacity: p.opacity - 0.02 })).filter(p => p.opacity > 0);
+            floatingPoints = floatingPoints.map(fp => ({ ...fp, opacity: fp.opacity - 0.015, yOffset: fp.yOffset - 1.5 })).filter(fp => fp.opacity > 0);
+        }
+        
+        // Game loop
+        let lastInputTime = 0;
+        
+        function gameLoop() {
+            if (gameState === 'playing' && !isPaused) {
+                updateFish();
+                renderFish();
+                renderEffects();
+                renderFloatingPoints();
+            }
+            animationFrame = requestAnimationFrame(gameLoop);
+        }
+        
+        // Handle tap
+        function handleTap(e) {
+            if (gameState !== 'playing' || isPaused) return;
+            
+            e.preventDefault();
+            
+            const now = Date.now();
+            if (now - lastInputTime < 100) return;
+            lastInputTime = now;
+            
+            const rect = e.target.getBoundingClientRect ? e.target.getBoundingClientRect() : document.getElementById('game-container').getBoundingClientRect();
+            const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+            const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+            
+            if (isUnderLilyPad(x, y)) {
+                ripples.push({ id: now + Math.random(), x, y, size: 0, opacity: 0.8 });
+                playSplashSound();
+                return;
+            }
+            
+            ripples.push({ id: now + Math.random(), x, y, size: 0, opacity: 0.8 });
+            playSplashSound();
+            
+            // Sort fish by z-index (higher = on top) then by array position (later = on top)
+            const getZIndex = f => f.isGolden ? 4 : (f.isFast ? 3 : (f.isBoss ? 1 : 2));
+            const fishWithIndex = fish.map((f, idx) => ({ f, idx, z: getZIndex(f) }));
+            fishWithIndex.sort((a, b) => a.z !== b.z ? b.z - a.z : b.idx - a.idx);
+            const sortedFish = fishWithIndex.map(item => item.f);
+            
+            for (const f of sortedFish) {
+                if (f.popping) continue;
+                if (isUnderLilyPad(f.x, f.y)) continue;
+                
+                const dx = x - f.x, dy = y - f.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < f.hitRadius) {
+                    const lastTap = lastTapTimes.get(f.id) || 0;
+                    const timeSinceLastTap = now - lastTap;
+                    let pointsScored = 0;
+                    const fishToPop = [];
+                    
+                    // Golden fish: 3 taps in 3 seconds
+                    if (f.isGolden) {
+                        const elapsed = now - f.tapWindowStart;
+                        const windowExpired = f.tapped > 0 && elapsed > 3000;
+                        
+                        if (windowExpired) {
+                            playScoreSound();
+                            pointsScored = 1;
+                            lastTapTimes.set(f.id, now);
+                        } else if (f.tapped >= 2 && elapsed <= 3000) {
+                            playPopSound();
+                            pointsScored = 15;
+                            fishToPop.push(f.id);
+                            popEffects.push({ id: now + f.id, x: f.x, y: f.y, color: '#FFD700', size: f.actualSize, opacity: 1 });
+                        } else {
+                            playScoreSound();
+                            pointsScored = 1;
+                            lastTapTimes.set(f.id, now);
+                        }
+                    }
+                    // Boss fish: 4 taps in 5 seconds
+                    else if (f.isBoss) {
+                        const elapsed = now - f.tapWindowStart;
+                        if (elapsed <= 5000 && f.tapped >= 3) {
+                            playPopSound();
+                            pointsScored = 10;
+                            fishToPop.push(f.id);
+                            popEffects.push({ id: now + f.id, x: f.x, y: f.y, color: f.type.color, size: f.actualSize, opacity: 1 });
+                        } else {
+                            playScoreSound();
+                            pointsScored = 2;
+                            lastTapTimes.set(f.id, now);
+                        }
+                    }
+                    // Normal fish: 2 taps in 2 seconds
+                    else {
+                        if (timeSinceLastTap < DOUBLE_TAP_WINDOW && f.tapped >= 1) {
+                            playPopSound();
+                            pointsScored = 3;
+                            fishToPop.push(f.id);
+                            popEffects.push({ id: now + f.id, x: f.x, y: f.y, color: f.type.color, size: f.actualSize, opacity: 1 });
+                        } else {
+                            playScoreSound();
+                            pointsScored = 1;
+                            lastTapTimes.set(f.id, now);
+                        }
+                    }
+                    
+                    if (pointsScored > 0) {
+                        score += pointsScored;
+                        document.getElementById('score-value').textContent = score;
+                        
+                        if (fishToPop.length > 0) {
+                            floatingPoints.push({
+                                id: now + f.id,
+                                x: f.x,
+                                y: f.y,
+                                points: f.isGolden ? 15 : (f.isBoss ? 10 : 3),
+                                opacity: 1,
+                                yOffset: 0
+                            });
+                        }
+                    }
+                    
+                    // Update fish state
+                    for (let i = 0; i < fish.length; i++) {
+                        if (fishToPop.includes(fish[i].id)) {
+                            fish[i].popping = true;
+                            fish[i].popOpacity = 1;
+                        } else if (fish[i].id === f.id && !fishToPop.includes(f.id)) {
+                            fish[i].tapped++;
+                            fish[i].speedBoost = 1;
+                            fish[i].angle = Math.atan2(dy, dx) + Math.PI;
+                            if (fish[i].tapWindowStart === 0) fish[i].tapWindowStart = now;
+                        }
+                    }
+                    
+                    break;
+                }
+            }
+        }
+        
+        // Spawn fish
+        function spawnFish() {
+            const activeFish = fish.filter(f => !f.popping).length;
+            if (activeFish < settings.fishCount) {
+                fish.push(createFish());
+            }
+        }
+        
+        function spawnFastFish() {
+            const activeFish = fish.filter(f => !f.popping).length;
+            if (activeFish < settings.fishCount) {
+                fish.push(createFish(false, true, false));
+            }
+        }
+        
+        function spawnGoldenFish() {
+            const goldenCount = fish.filter(f => f.isGolden && !f.popping).length;
+            if (goldenCount < 1) {
+                fish.push(createFish(false, false, true));
+            }
+        }
+        
+        function spawnBossFish() {
+            const bossCount = fish.filter(f => f.isBoss && !f.popping).length;
+            if (bossCount < 1) {
+                fish.push(createFish(true, false, false));
+            }
+        }
+        
+        // Spawn intervals
+        let spawnInterval, fastFishInterval, goldenFishInterval, bossFishInterval;
+        
+        function startSpawners() {
+            spawnInterval = setInterval(spawnFish, 2000);
+            fastFishInterval = setInterval(spawnFastFish, 8000 + Math.random() * 7000);
+            goldenFishInterval = setInterval(spawnGoldenFish, 8000 + Math.random() * 7000);
+            bossFishInterval = setInterval(spawnBossFish, 20000 + Math.random() * 20000);
+        }
+        
+        function stopSpawners() {
+            clearInterval(spawnInterval);
+            clearInterval(fastFishInterval);
+            clearInterval(goldenFishInterval);
+            clearInterval(bossFishInterval);
+        }
+        
+        // Game control
+        function startGame() {
+            gameState = 'playing';
+            score = 0;
+            timeLeft = settings.duration;
+            fish = [];
+            ripples = [];
+            popEffects = [];
+            floatingPoints = [];
+            lilyPads = [];
+            lastTapTimes.clear();
+            fishIdCounter = 0;
+            isPaused = false;
+            
+            document.getElementById('score-value').textContent = '0';
+            document.getElementById('timer-value').textContent = formatTime(timeLeft);
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('settings-modal').classList.add('hidden');
+            document.getElementById('score-display').classList.remove('hidden');
+            document.getElementById('sound-btn').classList.remove('hidden');
+            
+            if (settings.foreverMode) {
+                document.getElementById('timer-display').classList.add('hidden');
+            } else {
+                document.getElementById('timer-display').classList.remove('hidden');
+            }
+            
+            createLilyPads();
+            renderLilyPads();
+            createLightRays();
+            
+            for (let i = 0; i < settings.fishCount; i++) {
+                fish.push(createFish());
+            }
+            
+            startSpawners();
+            
+            if (!settings.foreverMode) {
+                gameTimer = setInterval(() => {
+                    timeLeft--;
+                    document.getElementById('timer-value').textContent = formatTime(timeLeft);
+                    if (timeLeft <= 10) {
+                        document.getElementById('timer-value').classList.add('timer-warning');
+                    }
+                    if (timeLeft <= 0) {
+                        endGame();
+                    }
+                }, 1000);
+            }
+            
+            gameLoop();
+        }
+        
+        function endGame() {
+            gameState = 'ended';
+            stopSpawners();
+            clearInterval(gameTimer);
+            
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('game-over-screen').classList.remove('hidden');
+            
+            saveHighScore(score);
+        }
+        
+        function stopGame() {
+            gameState = 'menu';
+            stopSpawners();
+            clearInterval(gameTimer);
+            cancelAnimationFrame(animationFrame);
+            
+            document.getElementById('menu-screen').classList.remove('hidden');
+            document.getElementById('score-display').classList.add('hidden');
+            document.getElementById('sound-btn').classList.add('hidden');
+            document.getElementById('timer-value').classList.remove('timer-warning');
+        }
+        
+        function showMenu() {
+            stopGame();
+        }
+        
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+        
+        // High scores
+        function loadHighScores() {
+            try {
+                const saved = localStorage.getItem('catFishHighScores');
+                if (saved) {
+                    const scores = JSON.parse(saved);
+                    renderHighScores(scores);
+                    return scores;
+                }
+            } catch(e) {}
+            return [];
+        }
+        
+        function saveHighScore(newScore) {
+            try {
+                const saved = localStorage.getItem('catFishHighScores') || '[]';
+                let scores = JSON.parse(saved);
+                scores.push({ score: newScore, date: new Date().toLocaleDateString() });
+                scores.sort((a, b) => b.score - a.score);
+                scores = scores.slice(0, 10);
+                localStorage.setItem('catFishHighScores', JSON.stringify(scores));
+                renderHighScores(scores);
+                
+                if (scores[0] && scores[0].score === newScore) {
+                    document.getElementById('new-high-score').classList.remove('hidden');
+                } else {
+                    document.getElementById('new-high-score').classList.add('hidden');
+                }
+            } catch(e) {}
+        }
+        
+        function renderHighScores(scores) {
+            if (scores.length > 0) {
+                document.getElementById('high-scores').classList.remove('hidden');
+                const list = document.getElementById('high-scores-list');
+                list.innerHTML = scores.slice(0, 5).map((s, i) => 
+                    `<div class="high-score-item"><span>#${i + 1}: ${s.score} pts</span><span style="font-size: 12px; color: #9ca3af;">${s.date}</span></div>`
+                ).join('');
+            }
+        }
+        
+        // Settings
+        function toggleMenuSettings() {
+            menuSettingsCollapsed = !menuSettingsCollapsed;
+            const content = document.getElementById('menu-settings-content');
+            const chevron = document.getElementById('settings-chevron');
+            
+            if (menuSettingsCollapsed) {
+                content.classList.add('hidden');
+                chevron.innerHTML = '<polyline points="6,9 12,15 18,9"/>';
+            } else {
+                content.classList.remove('hidden');
+                chevron.innerHTML = '<polyline points="6,15 12,9 18,15"/>';
+            }
+        }
+        
+        function openSettings() {
+            isPaused = true;
+            document.getElementById('settings-modal').classList.remove('hidden');
+            syncSettingsToModal();
+        }
+        
+        function closeSettings() {
+            isPaused = false;
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+        
+        function syncSettingsToModal() {
+            document.getElementById('duration-slider-modal').value = settings.duration;
+            document.getElementById('duration-label-modal').textContent = 'Duration: ' + formatTime(settings.duration);
+            document.getElementById('fish-count-slider-modal').value = settings.fishCount;
+            document.getElementById('fish-count-label-modal').textContent = 'Fish: ' + settings.fishCount;
+            document.getElementById('fish-speed-slider-modal').value = settings.fishSpeed * 10;
+            document.getElementById('fish-speed-label-modal').textContent = 'Speed: ' + settings.fishSpeed.toFixed(1) + 'x';
+            
+            document.getElementById('forever-toggle-modal').classList.toggle('active', settings.foreverMode);
+            document.getElementById('sound-toggle-modal').classList.toggle('active', settings.soundEnabled);
+            
+            updateQualityButtons();
+        }
+        
+        function updateDuration() {
+            settings.duration = parseInt(document.getElementById('duration-slider').value);
+            document.getElementById('duration-label').textContent = 'Duration: ' + formatTime(settings.duration);
+        }
+        
+        function updateDurationModal() {
+            settings.duration = parseInt(document.getElementById('duration-slider-modal').value);
+            document.getElementById('duration-label-modal').textContent = 'Duration: ' + formatTime(settings.duration);
+            document.getElementById('duration-slider').value = settings.duration;
+            document.getElementById('duration-label').textContent = 'Duration: ' + formatTime(settings.duration);
+        }
+        
+        function updateFishCount() {
+            settings.fishCount = parseInt(document.getElementById('fish-count-slider').value);
+            document.getElementById('fish-count-label').textContent = 'Fish: ' + settings.fishCount;
+        }
+        
+        function updateFishCountModal() {
+            settings.fishCount = parseInt(document.getElementById('fish-count-slider-modal').value);
+            document.getElementById('fish-count-label-modal').textContent = 'Fish: ' + settings.fishCount;
+            document.getElementById('fish-count-slider').value = settings.fishCount;
+            document.getElementById('fish-count-label').textContent = 'Fish: ' + settings.fishCount;
+        }
+        
+        function updateFishSpeed() {
+            settings.fishSpeed = parseInt(document.getElementById('fish-speed-slider').value) / 10;
+            document.getElementById('fish-speed-label').textContent = 'Speed: ' + settings.fishSpeed.toFixed(1) + 'x';
+        }
+        
+        function updateFishSpeedModal() {
+            settings.fishSpeed = parseInt(document.getElementById('fish-speed-slider-modal').value) / 10;
+            document.getElementById('fish-speed-label-modal').textContent = 'Speed: ' + settings.fishSpeed.toFixed(1) + 'x';
+            document.getElementById('fish-speed-slider').value = settings.fishSpeed * 10;
+            document.getElementById('fish-speed-label').textContent = 'Speed: ' + settings.fishSpeed.toFixed(1) + 'x';
+        }
+        
+        function toggleForeverMode() {
+            settings.foreverMode = !settings.foreverMode;
+            document.getElementById('forever-toggle').classList.toggle('active', settings.foreverMode);
+            document.getElementById('forever-toggle-modal').classList.toggle('active', settings.foreverMode);
+            document.getElementById('duration-setting').style.display = settings.foreverMode ? 'none' : 'block';
+            document.getElementById('duration-setting-modal').style.display = settings.foreverMode ? 'none' : 'block';
+        }
+        
+        function toggleSound() {
+            settings.soundEnabled = !settings.soundEnabled;
+            updateSoundIcons();
+        }
+        
+        function toggleSoundSetting() {
+            settings.soundEnabled = !settings.soundEnabled;
+            updateSoundIcons();
+        }
+        
+        function updateSoundIcons() {
+            document.getElementById('sound-on-icon').classList.toggle('hidden', !settings.soundEnabled);
+            document.getElementById('sound-off-icon').classList.toggle('hidden', settings.soundEnabled);
+            document.getElementById('sound-toggle').classList.toggle('active', settings.soundEnabled);
+            document.getElementById('sound-toggle-modal').classList.toggle('active', settings.soundEnabled);
+        }
+        
+        function setQuality(q) {
+            settings.quality = q;
+            updateQualityButtons();
+            createLightRays();
+        }
+        
+        function updateQualityButtons() {
+            ['low', 'medium', 'high', 'ultra'].forEach(q => {
+                document.getElementById('quality-' + q)?.classList.toggle('active', q === settings.quality);
+                document.getElementById('quality-' + q + '-modal')?.classList.toggle('active', q === settings.quality);
+            });
+        }
+        
+        function clearAllData() {
+            localStorage.removeItem('catFishHighScores');
+            settings = { duration: 60, fishCount: 8, fishSpeed: 1.0, soundEnabled: true, foreverMode: false, quality: 'high' };
+            document.getElementById('high-scores').classList.add('hidden');
+            document.getElementById('duration-slider').value = 60;
+            document.getElementById('duration-label').textContent = 'Duration: 1:00';
+            document.getElementById('fish-count-slider').value = 8;
+            document.getElementById('fish-count-label').textContent = 'Fish: 8';
+            document.getElementById('fish-speed-slider').value = 10;
+            document.getElementById('fish-speed-label').textContent = 'Speed: 1.0x';
+            updateSoundIcons();
+            updateQualityButtons();
+            document.getElementById('forever-toggle').classList.remove('active');
+        }
+        
+        // Fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                isFullscreen = true;
+            } else {
+                document.exitFullscreen();
+                isFullscreen = false;
+            }
+            updateFullscreenUI();
+        }
+        
+        function exitFullscreen() {
+            document.exitFullscreen();
+            isFullscreen = false;
+            updateFullscreenUI();
+        }
+        
+        function updateFullscreenUI() {
+            document.getElementById('control-bar').classList.toggle('hidden', isFullscreen);
+            document.getElementById('fullscreen-exit').classList.toggle('hidden', !isFullscreen);
+            document.getElementById('fullscreen-text').textContent = isFullscreen ? 'Exit Fullscreen' : 'Go Fullscreen';
+        }
+        
+        document.addEventListener('fullscreenchange', () => {
+            isFullscreen = !!document.fullscreenElement;
+            updateFullscreenUI();
+        });
+        
+        // Event listeners
+        document.getElementById('game-container').addEventListener('pointerdown', handleTap);
+        document.getElementById('game-container').addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+        document.getElementById('game-container').addEventListener('contextmenu', e => e.preventDefault());
+        
+        // Init
+        loadHighScores();
+        createLightRays();
+    </script>
+</body>
+</html>
