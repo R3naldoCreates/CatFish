@@ -8,7 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
         
-        #game-container { width: 100%; height: 100%; position: relative; background: linear-gradient(180deg, #1a5276 0%, #2471a3 30%, #2980b9 60%, #1a5276 100%); cursor: crosshair; }
+        #game-container { width: 100%; height: 100%; position: relative; background: linear-gradient(180deg, #1a5276 0%, #2471a3 30%, #2980b9 60%, #1a5276 100%); cursor: crosshair; touch-action: none; }
         
         .water-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 5; background: radial-gradient(ellipse 100% 50% at 50% 0%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(ellipse 80% 40% at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 40%), radial-gradient(ellipse 60% 30% at 70% 30%, rgba(255,255,255,0.08) 0%, transparent 35%); }
         
@@ -31,7 +31,7 @@
         .floating-points { position: absolute; pointer-events: none; font-weight: bold; color: #fde047; font-size: 32px; text-shadow: 0 0 10px gold, 0 2px 4px rgba(0,0,0,0.5); z-index: 200; }
         
         .control-bar { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); border-radius: 50px; padding: 8px 16px; z-index: 200; }
-        .control-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: white; }
+        .control-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: white; touch-action: manipulation; }
         .control-btn:active { transform: scale(0.95); }
         .btn-home { background: rgba(239,68,68,0.8); }
         .btn-home:hover { background: rgba(220,38,38,0.9); }
@@ -45,7 +45,7 @@
         .timer-warning { color: #f87171; animation: pulse 0.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
-        .sound-btn { position: absolute; top: 70px; right: 16px; width: 48px; height: 48px; border-radius: 50%; background: rgba(0,0,0,0.3); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; z-index: 150; }
+        .sound-btn { position: absolute; top: 70px; right: 16px; width: 48px; height: 48px; border-radius: 50%; background: rgba(0,0,0,0.3); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; z-index: 150; touch-action: manipulation; }
         
         .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .menu-card { background: rgba(255,255,255,0.95); border-radius: 24px; padding: 32px; max-width: 400px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); z-index: 1001; }
@@ -57,7 +57,7 @@
         .high-scores-title { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #374151; margin-bottom: 8px; }
         .high-score-item { display: flex; justify-content: space-between; font-size: 14px; color: #6b7280; padding: 2px 0; }
         
-        .settings-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f3f4f6; border-radius: 12px; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: #374151; margin-bottom: 16px; }
+        .settings-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f3f4f6; border-radius: 12px; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: #374151; margin-bottom: 16px; touch-action: manipulation; }
         .settings-toggle:hover { background: #e5e7eb; }
         .settings-content { padding: 16px; background: #f9fafb; border-radius: 0 0 12px 12px; border-top: 1px solid #e5e7eb; margin-top: -12px; margin-bottom: 16px; }
         
@@ -66,18 +66,18 @@
         .setting-slider { width: 100%; height: 8px; border-radius: 4px; background: #e5e7eb; -webkit-appearance: none; appearance: none; cursor: pointer; }
         .setting-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; cursor: pointer; }
         .setting-toggle-row { display: flex; align-items: center; justify-content: space-between; }
-        .toggle-switch { width: 48px; height: 28px; background: #d1d5db; border-radius: 14px; position: relative; cursor: pointer; transition: background 0.2s; }
+        .toggle-switch { width: 48px; height: 28px; background: #d1d5db; border-radius: 14px; position: relative; cursor: pointer; transition: background 0.2s; touch-action: manipulation; }
         .toggle-switch.active { background: #3b82f6; }
         .toggle-switch::after { content: ''; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: left 0.2s; }
         .toggle-switch.active::after { left: 23px; }
         
         .quality-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
-        .quality-btn { padding: 8px; border-radius: 8px; border: none; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .quality-btn { padding: 8px; border-radius: 8px; border: none; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; touch-action: manipulation; }
         .quality-btn.active { background: #3b82f6; color: white; }
         .quality-btn:not(.active) { background: #e5e7eb; color: #6b7280; }
         .quality-btn:not(.active):hover { background: #d1d5db; }
         
-        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 18px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; touch-action: manipulation; }
         .btn-primary { background: linear-gradient(to right, #3b82f6, #06b6d4); color: white; padding: 24px; }
         .btn-primary:hover { background: linear-gradient(to right, #2563eb, #0891b2); }
         .btn-outline { background: white; border: 1px solid #e5e7eb; color: #374151; margin-top: 12px; }
@@ -93,7 +93,7 @@
         .settings-card { background: white; border-radius: 16px; padding: 24px; max-width: 350px; width: 90%; z-index: 1101; }
         .settings-title { font-size: 20px; font-weight: 600; color: #1f2937; margin-bottom: 24px; }
         
-        .fullscreen-exit { position: fixed; bottom: 16px; right: 16px; width: 56px; height: 56px; border-radius: 50%; background: rgba(0,0,0,0.6); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; z-index: 500; }
+        .fullscreen-exit { position: fixed; bottom: 16px; right: 16px; width: 56px; height: 56px; border-radius: 50%; background: rgba(0,0,0,0.6); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; z-index: 500; touch-action: manipulation; }
         
         .new-high-score { background: linear-gradient(to right, #fef9c3, #ffedd5); color: #ea580c; padding: 8px 16px; border-radius: 50px; display: inline-block; margin-bottom: 24px; }
         .final-score { font-size: 48px; font-weight: bold; color: #3b82f6; margin: 16px 0; }
@@ -115,13 +115,13 @@
         <div id="floating-points-container"></div>
         
         <div id="control-bar" class="control-bar">
-            <button class="control-btn btn-home" onclick="stopGame()" title="Menu">
+            <button class="control-btn btn-home" ontouchend="event.preventDefault(); stopGame()" onclick="stopGame()" title="Menu">
                 <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
             </button>
-            <button class="control-btn btn-settings" onclick="openSettings()" title="Settings">
+            <button class="control-btn btn-settings" ontouchend="event.preventDefault(); openSettings()" onclick="openSettings()" title="Settings">
                 <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
-            <button id="fullscreen-btn" class="control-btn btn-fullscreen" onclick="toggleFullscreen()" title="Fullscreen">
+            <button id="fullscreen-btn" class="control-btn btn-fullscreen" ontouchend="event.preventDefault(); toggleFullscreen()" onclick="toggleFullscreen()" title="Fullscreen">
                 <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,3 21,3 21,9"/><polyline points="9,21 3,21 3,15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
             </button>
         </div>
@@ -136,12 +136,12 @@
             </div>
         </div>
         
-        <button id="sound-btn" class="sound-btn hidden" onclick="toggleSound()">
+        <button id="sound-btn" class="sound-btn hidden" ontouchend="event.preventDefault(); toggleSound()" onclick="toggleSound()">
             <svg id="sound-on-icon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
             <svg id="sound-off-icon" class="icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
         </button>
         
-        <button id="fullscreen-exit" class="fullscreen-exit hidden" onclick="exitFullscreen()">
+        <button id="fullscreen-exit" class="fullscreen-exit hidden" ontouchend="event.preventDefault(); exitFullscreen()" onclick="exitFullscreen()">
             <svg class="icon-large" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,14 10,14 10,20"/><polyline points="20,10 14,10 14,4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
         </button>
         
@@ -163,14 +163,14 @@
                     <div id="high-scores-list"></div>
                 </div>
                 
-                <button class="settings-toggle" onclick="toggleMenuSettings()">
+                <button class="settings-toggle" ontouchend="event.preventDefault(); toggleMenuSettings()" onclick="toggleMenuSettings()">
                     <span>Settings</span>
                     <svg id="settings-chevron" class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
                 </button>
                 <div id="menu-settings-content" class="settings-content hidden">
                     <div class="setting-row setting-toggle-row">
                         <span class="setting-label" style="margin: 0;">Forever Mode</span>
-                        <div id="forever-toggle" class="toggle-switch" onclick="toggleForeverMode()"></div>
+                        <div id="forever-toggle" class="toggle-switch" ontouchend="event.preventDefault(); toggleForeverMode()" onclick="toggleForeverMode()"></div>
                     </div>
                     
                     <div id="duration-setting" class="setting-row">
@@ -190,28 +190,28 @@
                     
                     <div class="setting-row setting-toggle-row">
                         <span class="setting-label" style="margin: 0;">Sound</span>
-                        <div id="sound-toggle" class="toggle-switch active" onclick="toggleSoundSetting()"></div>
+                        <div id="sound-toggle" class="toggle-switch active" ontouchend="event.preventDefault(); toggleSoundSetting()" onclick="toggleSoundSetting()"></div>
                     </div>
                     
                     <div class="setting-row">
                         <label class="setting-label">Quality</label>
                         <div class="quality-buttons">
-                            <button id="quality-low" class="quality-btn" onclick="setQuality('low')">Low</button>
-                            <button id="quality-medium" class="quality-btn" onclick="setQuality('medium')">Med</button>
-                            <button id="quality-high" class="quality-btn active" onclick="setQuality('high')">High</button>
-                            <button id="quality-ultra" class="quality-btn" onclick="setQuality('ultra')">Ultra</button>
+                            <button id="quality-low" class="quality-btn" ontouchend="event.preventDefault(); setQuality('low')" onclick="setQuality('low')">Low</button>
+                            <button id="quality-medium" class="quality-btn" ontouchend="event.preventDefault(); setQuality('medium')" onclick="setQuality('medium')">Med</button>
+                            <button id="quality-high" class="quality-btn active" ontouchend="event.preventDefault(); setQuality('high')" onclick="setQuality('high')">High</button>
+                            <button id="quality-ultra" class="quality-btn" ontouchend="event.preventDefault(); setQuality('ultra')" onclick="setQuality('ultra')">Ultra</button>
                         </div>
                     </div>
                     
-                    <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+                    <button class="btn btn-danger" ontouchend="event.preventDefault(); clearAllData()" onclick="clearAllData()">Clear All Data</button>
                 </div>
                 
-                <button class="btn btn-primary" onclick="startGame()">
+                <button class="btn btn-primary" ontouchend="event.preventDefault(); startGame()" onclick="startGame()">
                     <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
                     Start Game
                 </button>
                 
-                <button id="fullscreen-toggle-btn" class="btn btn-outline" onclick="toggleFullscreen()">
+                <button id="fullscreen-toggle-btn" class="btn btn-outline" ontouchend="event.preventDefault(); toggleFullscreen()" onclick="toggleFullscreen()">
                     <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,3 21,3 21,9"/><polyline points="9,21 3,21 3,15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
                     <span id="fullscreen-text">Go Fullscreen</span>
                 </button>
@@ -233,7 +233,7 @@
                 
                 <div class="setting-row setting-toggle-row">
                     <span class="setting-label" style="margin: 0;">Forever Mode</span>
-                    <div id="forever-toggle-modal" class="toggle-switch" onclick="toggleForeverMode()"></div>
+                    <div id="forever-toggle-modal" class="toggle-switch" ontouchend="event.preventDefault(); toggleForeverMode()" onclick="toggleForeverMode()"></div>
                 </div>
                 
                 <div id="duration-setting-modal" class="setting-row">
@@ -253,20 +253,20 @@
                 
                 <div class="setting-row setting-toggle-row">
                     <span class="setting-label" style="margin: 0;">Sound</span>
-                    <div id="sound-toggle-modal" class="toggle-switch active" onclick="toggleSoundSetting()"></div>
+                    <div id="sound-toggle-modal" class="toggle-switch active" ontouchend="event.preventDefault(); toggleSoundSetting()" onclick="toggleSoundSetting()"></div>
                 </div>
                 
                 <div class="setting-row">
                     <label class="setting-label">Quality</label>
                     <div class="quality-buttons">
-                        <button id="quality-low-modal" class="quality-btn" onclick="setQuality('low')">Low</button>
-                        <button id="quality-medium-modal" class="quality-btn" onclick="setQuality('medium')">Med</button>
-                        <button id="quality-high-modal" class="quality-btn active" onclick="setQuality('high')">High</button>
-                        <button id="quality-ultra-modal" class="quality-btn" onclick="setQuality('ultra')">Ultra</button>
+                        <button id="quality-low-modal" class="quality-btn" ontouchend="event.preventDefault(); setQuality('low')" onclick="setQuality('low')">Low</button>
+                        <button id="quality-medium-modal" class="quality-btn" ontouchend="event.preventDefault(); setQuality('medium')" onclick="setQuality('medium')">Med</button>
+                        <button id="quality-high-modal" class="quality-btn active" ontouchend="event.preventDefault(); setQuality('high')" onclick="setQuality('high')">High</button>
+                        <button id="quality-ultra-modal" class="quality-btn" ontouchend="event.preventDefault(); setQuality('ultra')" onclick="setQuality('ultra')">Ultra</button>
                     </div>
                 </div>
                 
-                <button class="btn btn-primary" onclick="closeSettings()" style="margin-top: 8px;">Resume Game</button>
+                <button class="btn btn-primary" ontouchend="event.preventDefault(); closeSettings()" onclick="closeSettings()" style="margin-top: 8px;">Resume Game</button>
             </div>
         </div>
         
@@ -280,11 +280,11 @@
                 
                 <div id="new-high-score" class="new-high-score hidden">New High Score!</div>
                 
-                <button class="btn btn-primary" onclick="startGame()">
+                <button class="btn btn-primary" ontouchend="event.preventDefault(); startGame()" onclick="startGame()">
                     <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
                     Play Again
                 </button>
-                <button class="btn btn-outline" onclick="showMenu()">Back to Menu</button>
+                <button class="btn btn-outline" ontouchend="event.preventDefault(); showMenu()" onclick="showMenu()">Back to Menu</button>
             </div>
         </div>
     </div>
@@ -354,6 +354,7 @@
             if (!settings.soundEnabled) return;
             try {
                 const ctx = getAudioContext();
+                if (ctx.state === 'suspended') ctx.resume();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain);
@@ -371,6 +372,7 @@
             if (!settings.soundEnabled) return;
             try {
                 const ctx = getAudioContext();
+                if (ctx.state === 'suspended') ctx.resume();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = 'sine';
@@ -389,6 +391,7 @@
             if (!settings.soundEnabled) return;
             try {
                 const ctx = getAudioContext();
+                if (ctx.state === 'suspended') ctx.resume();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = 'sine';
@@ -517,12 +520,7 @@
                 div.style.top = (pad.y - pad.height / 2) + 'px';
                 div.style.width = pad.width + 'px';
                 div.style.height = pad.height + 'px';
-                div.innerHTML = `<svg viewBox="0 0 100 100" width="100%" height="100%">
-                    <ellipse cx="50" cy="50" rx="45" ry="35" fill="#2d5a27"/>
-                    <path d="M50 15 Q50 50 50 85" stroke="#1a3d18" stroke-width="3" fill="none"/>
-                    <ellipse cx="35" cy="45" rx="8" ry="6" fill="#3d7a37" opacity="0.5"/>
-                    <ellipse cx="60" cy="55" rx="10" ry="7" fill="#3d7a37" opacity="0.4"/>
-                </svg>`;
+                div.innerHTML = '<svg viewBox="0 0 100 100" width="100%" height="100%"><ellipse cx="50" cy="50" rx="45" ry="35" fill="#2d5a27"/><path d="M50 15 Q50 50 50 85" stroke="#1a3d18" stroke-width="3" fill="none"/><ellipse cx="35" cy="45" rx="8" ry="6" fill="#3d7a37" opacity="0.5"/><ellipse cx="60" cy="55" rx="10" ry="7" fill="#3d7a37" opacity="0.4"/></svg>';
                 container.appendChild(div);
             }
         }
@@ -555,52 +553,22 @@
                 
                 const config = QUALITY_CONFIG[settings.quality];
                 
-                let fishSVG = `<svg width="${f.actualSize}" height="${f.actualSize * 0.6}" viewBox="0 0 100 60" style="overflow: visible;">
-                    <ellipse cx="45" cy="30" rx="35" ry="20" fill="${f.type.color}"/>
-                    <polygon points="80,30 95,15 95,45" fill="${f.type.color}" transform="rotate(${tailWag}, 80, 30)"/>
-                    <polygon points="35,10 50,0 55,10" fill="${f.type.color}" transform="rotate(${finMove * 0.5}, 45, 10)"/>
-                    <polygon points="35,50 50,60 55,50" fill="${f.type.color}" transform="rotate(${-finMove * 0.5}, 45, 50)"/>
-                    <circle cx="25" cy="25" r="${eyeR}" fill="white"/>
-                    <circle cx="23" cy="25" r="${pupilR}" fill="black"/>
-                    <ellipse cx="40" cy="22" rx="15" ry="8" fill="white" opacity="0.3"/>`;
+                let fishSVG = '<svg width="' + f.actualSize + '" height="' + (f.actualSize * 0.6) + '" viewBox="0 0 100 60" style="overflow: visible;"><ellipse cx="45" cy="30" rx="35" ry="20" fill="' + f.type.color + '"/><polygon points="80,30 95,15 95,45" fill="' + f.type.color + '" transform="rotate(' + tailWag + ', 80, 30)"/><polygon points="35,10 50,0 55,10" fill="' + f.type.color + '" transform="rotate(' + (finMove * 0.5) + ', 45, 10)"/><polygon points="35,50 50,60 55,50" fill="' + f.type.color + '" transform="rotate(' + (-finMove * 0.5) + ', 45, 50)"/><circle cx="25" cy="25" r="' + eyeR + '" fill="white"/><circle cx="23" cy="25" r="' + pupilR + '" fill="black"/><ellipse cx="40" cy="22" rx="15" ry="8" fill="white" opacity="0.3"/>';
                 
                 if (config.fishScales) {
-                    fishSVG += `<g opacity="0.2">
-                        <circle cx="35" cy="30" r="5" fill="white"/>
-                        <circle cx="45" cy="35" r="5" fill="white"/>
-                        <circle cx="55" cy="28" r="5" fill="white"/>
-                        <circle cx="50" cy="40" r="4" fill="white"/>
-                    </g>`;
+                    fishSVG += '<g opacity="0.2"><circle cx="35" cy="30" r="5" fill="white"/><circle cx="45" cy="35" r="5" fill="white"/><circle cx="55" cy="28" r="5" fill="white"/><circle cx="50" cy="40" r="4" fill="white"/></g>';
                 }
                 
                 if (f.isFast) {
-                    fishSVG += `<g>
-                        <line x1="95" y1="30" x2="110" y2="30" stroke="white" stroke-width="2" opacity="0.6"/>
-                        <line x1="95" y1="25" x2="105" y2="25" stroke="white" stroke-width="1.5" opacity="0.4"/>
-                        <line x1="95" y1="35" x2="105" y2="35" stroke="white" stroke-width="1.5" opacity="0.4"/>
-                    </g>`;
+                    fishSVG += '<g><line x1="95" y1="30" x2="110" y2="30" stroke="white" stroke-width="2" opacity="0.6"/><line x1="95" y1="25" x2="105" y2="25" stroke="white" stroke-width="1.5" opacity="0.4"/><line x1="95" y1="35" x2="105" y2="35" stroke="white" stroke-width="1.5" opacity="0.4"/></g>';
                 }
                 
                 if (f.isBoss) {
-                    fishSVG += `<g>
-                        <circle cx="45" cy="10" r="8" fill="gold" opacity="0.6"/>
-                        <text x="45" y="14" text-anchor="middle" font-size="10" fill="white" font-weight="bold">★</text>
-                    </g>`;
+                    fishSVG += '<g><circle cx="45" cy="10" r="8" fill="gold" opacity="0.6"/><text x="45" y="14" text-anchor="middle" font-size="10" fill="white" font-weight="bold">★</text></g>';
                 }
                 
                 if (f.isGolden) {
-                    fishSVG += `<g>
-                        <circle cx="50" cy="30" r="25" fill="url(#goldenGlow${f.id})" opacity="0.3"/>
-                        <text x="45" y="8" text-anchor="middle" font-size="8" fill="gold" font-weight="bold">✦</text>
-                        <text x="65" y="20" text-anchor="middle" font-size="6" fill="gold" opacity="0.8">✦</text>
-                        <text x="30" y="45" text-anchor="middle" font-size="7" fill="gold" opacity="0.7">✦</text>
-                        <defs>
-                            <radialGradient id="goldenGlow${f.id}">
-                                <stop offset="0%" stop-color="gold" stop-opacity="0.5"/>
-                                <stop offset="100%" stop-color="gold" stop-opacity="0"/>
-                            </radialGradient>
-                        </defs>
-                    </g>`;
+                    fishSVG += '<g><circle cx="50" cy="30" r="25" fill="url(#goldenGlow' + f.id + ')" opacity="0.3"/><text x="45" y="8" text-anchor="middle" font-size="8" fill="gold" font-weight="bold">✦</text><text x="65" y="20" text-anchor="middle" font-size="6" fill="gold" opacity="0.8">✦</text><text x="30" y="45" text-anchor="middle" font-size="7" fill="gold" opacity="0.7">✦</text><defs><radialGradient id="goldenGlow' + f.id + '"><stop offset="0%" stop-color="gold" stop-opacity="0.5"/><stop offset="100%" stop-color="gold" stop-opacity="0"/></radialGradient></defs></g>';
                 }
                 
                 fishSVG += '</svg>';
@@ -609,7 +577,7 @@
                 div.className = 'fish';
                 div.style.left = f.x + 'px';
                 div.style.top = f.y + 'px';
-                div.style.transform = `translate(-50%, -50%) rotate(${rotationDegrees}deg)`;
+                div.style.transform = 'translate(-50%, -50%) rotate(' + rotationDegrees + 'deg)';
                 div.style.opacity = displayOpacity;
                 div.style.zIndex = zIndex;
                 div.innerHTML = fishSVG;
@@ -644,7 +612,7 @@
                     div.style.width = '15px';
                     div.style.height = '15px';
                     div.style.backgroundColor = p.color;
-                    div.style.transform = `rotate(${j * (360 / config.popParticles)}deg) translateX(${p.size * 0.6}px)`;
+                    div.style.transform = 'rotate(' + (j * (360 / config.popParticles)) + 'deg) translateX(' + (p.size * 0.6) + 'px)';
                     div.style.opacity = p.opacity;
                     container.appendChild(div);
                 }
@@ -761,6 +729,29 @@
             animationFrame = requestAnimationFrame(gameLoop);
         }
         
+        // Get touch/mouse coordinates
+        function getEventCoords(e) {
+            const container = document.getElementById('game-container');
+            const rect = container.getBoundingClientRect();
+            let clientX, clientY;
+            
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+        
         // Handle tap
         function handleTap(e) {
             if (gameState !== 'playing' || isPaused) return;
@@ -768,12 +759,12 @@
             e.preventDefault();
             
             const now = Date.now();
-            if (now - lastInputTime < 100) return;
+            if (now - lastInputTime < 50) return;
             lastInputTime = now;
             
-            const rect = e.target.getBoundingClientRect ? e.target.getBoundingClientRect() : document.getElementById('game-container').getBoundingClientRect();
-            const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
-            const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+            const coords = getEventCoords(e);
+            const x = coords.x;
+            const y = coords.y;
             
             if (isUnderLilyPad(x, y)) {
                 ripples.push({ id: now + Math.random(), x, y, size: 0, opacity: 0.8 });
@@ -1015,7 +1006,7 @@
         function formatTime(seconds) {
             const m = Math.floor(seconds / 60);
             const s = (seconds % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
+            return m + ':' + s;
         }
         
         // High scores
@@ -1054,7 +1045,7 @@
                 document.getElementById('high-scores').classList.remove('hidden');
                 const list = document.getElementById('high-scores-list');
                 list.innerHTML = scores.slice(0, 5).map((s, i) => 
-                    `<div class="high-score-item"><span>#${i + 1}: ${s.score} pts</span><span style="font-size: 12px; color: #9ca3af;">${s.date}</span></div>`
+                    '<div class="high-score-item"><span>#' + (i + 1) + ': ' + s.score + ' pts</span><span style="font-size: 12px; color: #9ca3af;">' + s.date + '</span></div>'
                 ).join('');
             }
         }
@@ -1168,8 +1159,10 @@
         
         function updateQualityButtons() {
             ['low', 'medium', 'high', 'ultra'].forEach(q => {
-                document.getElementById('quality-' + q)?.classList.toggle('active', q === settings.quality);
-                document.getElementById('quality-' + q + '-modal')?.classList.toggle('active', q === settings.quality);
+                const btn1 = document.getElementById('quality-' + q);
+                const btn2 = document.getElementById('quality-' + q + '-modal');
+                if (btn1) btn1.classList.toggle('active', q === settings.quality);
+                if (btn2) btn2.classList.toggle('active', q === settings.quality);
             });
         }
         
@@ -1191,17 +1184,17 @@
         // Fullscreen
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
+                document.documentElement.requestFullscreen().catch(() => {});
                 isFullscreen = true;
             } else {
-                document.exitFullscreen();
+                document.exitFullscreen().catch(() => {});
                 isFullscreen = false;
             }
             updateFullscreenUI();
         }
         
         function exitFullscreen() {
-            document.exitFullscreen();
+            document.exitFullscreen().catch(() => {});
             isFullscreen = false;
             updateFullscreenUI();
         }
@@ -1217,10 +1210,22 @@
             updateFullscreenUI();
         });
         
-        // Event listeners
-        document.getElementById('game-container').addEventListener('pointerdown', handleTap);
-        document.getElementById('game-container').addEventListener('touchstart', e => e.preventDefault(), { passive: false });
-        document.getElementById('game-container').addEventListener('contextmenu', e => e.preventDefault());
+        // Event listeners - support both touch and mouse
+        const gameContainer = document.getElementById('game-container');
+        
+        // Touch events for tablets
+        gameContainer.addEventListener('touchstart', handleTap, { passive: false });
+        gameContainer.addEventListener('touchend', e => e.preventDefault(), { passive: false });
+        
+        // Mouse/pointer events for PC
+        gameContainer.addEventListener('pointerdown', handleTap);
+        gameContainer.addEventListener('mousedown', handleTap);
+        
+        // Prevent context menu
+        gameContainer.addEventListener('contextmenu', e => e.preventDefault());
+        
+        // Prevent default touch behaviors
+        document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
         
         // Init
         loadHighScores();
